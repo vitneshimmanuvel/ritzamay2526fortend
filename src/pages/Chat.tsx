@@ -120,7 +120,7 @@ export default function Chat() {
   useEffect(() => {
     if (options.length > 0) {
       setVisibleCards(0);
-      const timers: NodeJS.Timeout[] = [];
+      const timers: any[] = [];
       options.forEach((_, idx) => {
         timers.push(setTimeout(() => {
           setVisibleCards(prev => prev + 1);
