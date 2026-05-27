@@ -27,8 +27,8 @@ export default function AppLayout() {
 
   return (
     <div className="min-h-screen bg-white flex text-gray-900 font-sans">
-      {/* Navigation Sidebar */}
-      <aside className="w-16 border-r border-gray-200 bg-gray-50/50 backdrop-blur-md flex flex-col items-center relative z-20">
+      {/* Navigation Sidebar (Desktop Only) */}
+      <aside className="w-16 border-r border-gray-200 bg-gray-50/50 backdrop-blur-md flex-col items-center relative z-20 hidden md:flex shrink-0">
         <div className="p-3 mt-2 mb-4">
           <div className="bg-red-500/20 p-2 rounded-xl ring-1 ring-red-500/30">
             <MessageSquare className="w-5 h-5 text-red-400" />
@@ -97,8 +97,48 @@ export default function AppLayout() {
         </div>
       </aside>
 
+      {/* Mobile Bottom Navigation Bar */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 border-t border-gray-200/80 bg-white/95 backdrop-blur-lg flex items-center justify-around px-4 z-40 shadow-lg shrink-0">
+        {navItems.map((item) => {
+          if (item.adminOnly && !isAdmin) return null;
+          const isActive = location.pathname.startsWith(item.href);
+          return (
+            <Link
+              key={item.name}
+              to={item.href}
+              className={cn(
+                "flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all duration-200",
+                isActive
+                  ? "text-red-600 font-semibold"
+                  : "text-gray-500 hover:text-gray-700"
+              )}
+            >
+              <item.icon className="w-5 h-5 mb-0.5" />
+              <span className="text-[10px] font-medium">{item.name}</span>
+            </Link>
+          );
+        })}
+        {user ? (
+          <button
+            onClick={handleLogout}
+            className="flex flex-col items-center justify-center text-gray-500 hover:text-gray-700 py-1 px-3"
+          >
+            <LogOut className="w-5 h-5 mb-0.5" />
+            <span className="text-[10px] font-medium">Logout</span>
+          </button>
+        ) : (
+          <Link
+            to="/login"
+            className="flex flex-col items-center justify-center text-gray-500 hover:text-gray-700 py-1 px-3"
+          >
+            <Users className="w-5 h-5 mb-0.5" />
+            <span className="text-[10px] font-medium">Login</span>
+          </Link>
+        )}
+      </nav>
+
       {/* Main Content */}
-      <main className="flex-1 flex flex-col h-screen relative overflow-hidden bg-white">
+      <main className="flex-1 flex flex-col h-screen relative overflow-hidden bg-white pb-16 md:pb-0">
         {/* Subtle background glow for main area */}
         <div className="flex-1 overflow-hidden z-10 relative">
           <Outlet />

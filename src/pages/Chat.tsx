@@ -11,6 +11,7 @@ export default function Chat() {
   const [loading, setLoading] = useState(false);
   const [loadingSessions, setLoadingSessions] = useState(true);
   const [visibleCards, setVisibleCards] = useState<number>(0);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -108,6 +109,12 @@ export default function Chat() {
     loadSessions();
   }, [setChatSessions]);
 
+  // Always start with a new clean chat on page load
+  useEffect(() => {
+    clearChat();
+    setIsInputReleased(false);
+  }, []);
+
   // Auto-scroll to bottom dynamically as cards render
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -146,6 +153,7 @@ export default function Chat() {
     setLoading(true);
     setOptions([]);
     setIsInputReleased(false);
+    setIsSidebarOpen(false); // Close mobile drawer
     try {
       const res = await api.get(`/chat/session/${sessionId}`);
       const msgs = (res.data.messages || []).map((m: any) => ({
@@ -166,6 +174,7 @@ export default function Chat() {
   const handleNewChat = () => {
     clearChat();
     setIsInputReleased(false);
+    setIsSidebarOpen(false); // Close mobile drawer
   };
 
   const handleSend = async (e: React.FormEvent) => {
@@ -316,9 +325,20 @@ export default function Chat() {
   const [isInputReleased, setIsInputReleased] = useState(false);
 
   return (
-    <div className="flex h-full">
-      {/* Chat History Sidebar */}
-      <div className="w-72 border-r border-gray-200/50 bg-gray-50 flex flex-col shrink-0">
+    <div className="flex h-full relative">
+      {/* Mobile History Drawer Backdrop */}
+      {isSidebarOpen && (
+        <div 
+          onClick={() => setIsSidebarOpen(false)}
+          className="md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200"
+        />
+      )}
+
+      {/* Chat History Sidebar (Desktop & Mobile Slide-Out Drawer) */}
+      <div className={`
+        ${isSidebarOpen ? 'translate-x-0 z-50 shadow-2xl' : '-translate-x-full md:translate-x-0'}
+        fixed md:static inset-y-0 left-0 w-72 border-r border-gray-200/50 bg-gray-50 flex flex-col shrink-0 transition-transform duration-300 ease-in-out h-full md:h-auto
+      `}>
         <div className="p-4 border-b border-gray-200/50">
           <Button
             onClick={handleNewChat}
@@ -372,8 +392,32 @@ export default function Chat() {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col relative bg-white">
-        {/* Chat History */}
+      <div className="flex-1 flex flex-col relative bg-white overflow-hidden">
+        {/* Sticky Top Header Bar (Mobile Only) */}
+        <header className="flex items-center justify-between px-4 py-3 border-b border-gray-100 md:hidden bg-white/90 backdrop-blur-md sticky top-0 z-30 shrink-0">
+          <Button
+            onClick={() => setIsSidebarOpen(true)}
+            variant="ghost"
+            size="icon"
+            className="text-gray-500 hover:text-gray-700 hover:bg-gray-100/50 rounded-xl"
+          >
+            <History className="w-5 h-5" />
+          </Button>
+          <div className="flex items-center gap-2">
+            <img src="/ritza.png" alt="Ritza" className="w-6 h-6 rounded-full object-cover border border-red-100 shadow-sm" />
+            <span className="font-semibold text-gray-800 text-sm">Ritza AI Buddy</span>
+          </div>
+          <Button
+            onClick={handleNewChat}
+            variant="ghost"
+            size="icon"
+            className="text-red-500 hover:text-red-600 hover:bg-red-50/50 rounded-xl"
+          >
+            <Plus className="w-5 h-5" />
+          </Button>
+        </header>
+
+        {/* Chat History Container */}
         <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 pb-6">
           {messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center space-y-4 mt-10">
@@ -452,7 +496,7 @@ export default function Chat() {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pl-[52px] pr-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pl-0 md:pl-[52px] pr-0 md:pr-4">
                 {options.map((opt, idx) => (
                   <button
                     key={opt.id}
