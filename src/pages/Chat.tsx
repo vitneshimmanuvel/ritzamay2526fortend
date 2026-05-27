@@ -183,6 +183,14 @@ export default function Chat() {
       const res = await api.post('/chat/options', { query, sessionId: currentSessionId });
       setOptions(res.data.options || []);
       
+      if (res.data.answer) {
+        addMessage({
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: res.data.answer
+        });
+      }
+      
       if (res.data.sessionId && res.data.sessionId !== currentSessionId) {
         setCurrentSessionId(res.data.sessionId);
         const sessRes = await api.get('/chat/sessions');
