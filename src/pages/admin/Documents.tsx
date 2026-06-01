@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Upload, File, Search, Trash2, Loader2, Sparkles, Plus, Globe } from "lucide-react";
+import { Upload, File, Search, Trash2, Loader2, Sparkles, Plus, Globe, ExternalLink } from "lucide-react";
 import api from '../../lib/api';
 
 interface RagDoc {
@@ -13,6 +13,7 @@ interface RagDoc {
   chunkCount: number;
   uploadedBy: string;
   status: 'processing' | 'ready' | 'failed';
+  url?: string;
   createdAt: string;
 }
 
@@ -319,7 +320,20 @@ export default function Documents() {
                       )}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-800">{doc.filename}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium text-gray-800">{doc.filename}</p>
+                        {doc.url && (
+                          <a
+                            href={doc.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-red-500 hover:text-red-400 p-0.5 rounded transition-colors inline-flex items-center"
+                            title="Open Cloudinary backup"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        )}
+                      </div>
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-xs text-gray-500">{doc.category}</span>
                         <span className="text-xs text-gray-500">•</span>
