@@ -109,9 +109,8 @@ export default function Chat() {
     loadSessions();
   }, [setChatSessions]);
 
-  // Always start with a new clean chat on page load
+  // On mount: keep existing persisted chat messages from localStorage if present
   useEffect(() => {
-    clearChat();
     setIsInputReleased(false);
   }, []);
 
